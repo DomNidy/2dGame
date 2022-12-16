@@ -23,9 +23,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void Update()
-    {
+    {   
+        // Read Horizontal Input
         inputHorizontal = Input.GetAxisRaw("Horizontal");
 
+        // Movement methods
         Flip();
         Jump();
     }
@@ -65,5 +67,14 @@ public class PlayerMovement : MonoBehaviour
     private bool IsGrounded()
     {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+    }
+
+    public bool IsWalking()
+    {
+        if(inputHorizontal != 0)
+        {
+            return true;
+        }
+        return false;
     }
 }
