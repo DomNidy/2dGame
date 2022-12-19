@@ -6,6 +6,8 @@ public class PlayerMovement : MonoBehaviour
 {
     // Player Movement Stats
     [SerializeField] private float speed = 8f;
+    [SerializeField] private float speedWalk = 8f;
+    [SerializeField] private float speedSprint = 12f;
     [SerializeField] private float jumpPower = 16f;
 
     // Player State Info
@@ -16,25 +18,48 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] Animator animator;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
-    {   
-        // Read Horizontal Input
-        inputHorizontal = Input.GetAxisRaw("Horizontal");
+    {
+        // Player Input
+        PlayerInput();
+        
 
         // Movement methods
         Flip();
         Jump();
+        
+        // Animate methods
+        AnimateMovement();
+        AnimateAttack();
+        AnimateJump();
     }
 
     private void FixedUpdate()
     {
         rb.velocity = new Vector2(inputHorizontal * speed, rb.velocity.y);
+    }
+
+    private void PlayerInput()
+    {
+        // Read Horizontal Input
+        inputHorizontal = Input.GetAxisRaw("Horizontal");
+
+        if(Input.GetKey(KeyCode.LeftShift))
+        {
+            speed = speedSprint;
+        }
+        else
+        {
+            speed = speedWalk;
+        }
     }
 
     private void Jump()
@@ -69,12 +94,31 @@ public class PlayerMovement : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
     }
 
-    public bool IsWalking()
+    private void AnimateAttack()
     {
-        if(inputHorizontal != 0)
+        // Animate attack
+        if (Input.GetMouseButtonDown(0))
         {
-            return true;
+            animator.SetTrigger("Attack");
         }
-        return false;
     }
+
+    private void AnimateMovement()
+    {
+        animator.SetFloat("PlayerSpeed", Mathf.Abs(inputHorizontal * speed));
+    }
+
+    private void AnimateJump()
+    {
+        if(rb.velocity.y > 0f)
+        {
+            animator.SetBool("isJumping", true);
+        }
+        if(IsGrounded())
+        {
+            animator.SetBool("isJumping", false);
+        }
+
+    }
+
 }
